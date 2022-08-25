@@ -48,9 +48,9 @@ function PaymentDetails() {
           <div className="my-2 flex rounded border border-gray-200 bg-white p-1">
             <input
               onChange={handleChange}
-              value={userData["password"] || ""}
-              name="password"
-              placeholder="Password"
+              value={userData["secret"] || ""}
+              name="secret"
+              placeholder="Secret"
               type="password"
               className="w-full appearance-none p-1 px-2 text-gray-800 outline-none"
             />

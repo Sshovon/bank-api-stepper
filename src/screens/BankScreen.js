@@ -9,6 +9,7 @@ import OTP from "../components/steps/OTP";
 import Final from "../components/steps/Final";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 function BankScreen({ accountNumber, amount }) {
   const steps = ["Payment Details", "One Time Password", "Confirmation"];
@@ -16,11 +17,41 @@ function BankScreen({ accountNumber, amount }) {
   const [userData, setUserData] = useState({ amount, accountNumber });
   const [finalData, setFinalData] = useState([]);
 
-  const handleClick = (direction = null) => {
+  const accountVerifier = async () => {
+    return axios.post("/api3/bank/validatesecret", {
+      secret: userData.secret,
+    });
+  };
+  const validTransaction = async () => {
+    return axios.post("/api1/valid/", { amount, accountNumber });
+  };
+
+  const handleClick = async (direction = null) => {
     let newStep = currentStep;
-    direction === "next" ? newStep++ : newStep--;
+    if (newStep === 1) {
+      await Promise.all([validTransaction(), accountVerifier()])
+        .then(function (results) {
+          const [validTransactionResult, accountVerifyResult] = results;
+
+          if (accountVerifyResult.data.status === false) {
+            toast.error("Incorrect PIN");
+          } else if (validTransactionResult.data.status === "invalid") {
+            toast.error("Insufficient Balance");
+          }else{
+            direction === "next" ? newStep++ : newStep--;
+            newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
+          }
+        })
+        .catch(() => {
+          toast.error("Error Occured!!");
+        });
+    } else if (newStep === 2) {
+        direction === "next" ? newStep++ : newStep--;
+        newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
+    }
+    // direction === "next" ? newStep++ : newStep--;
+    // newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
     // check if steps are within bounds
-    newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
   };
   const displayStep = (step) => {
     switch (step) {

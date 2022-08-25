@@ -59,8 +59,6 @@ const Stepper = ({ steps, currentStep }) => {
     
     stepsRef.current = stepsState;
     const current = updateStep(currentStep - 1, stepsRef.current);
-    //const current = updateStep(currentStep - 1, stepsState);
-    //console.log(stepsRef.current)
     setNewStep(current);
   }, [steps, currentStep]);
 
