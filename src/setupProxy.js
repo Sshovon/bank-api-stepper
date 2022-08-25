@@ -33,7 +33,7 @@ module.exports = function (app) {
   );
   app.use(
     createProxyMiddleware("/api1", {
-      target: "http://localhost:4004", // API endpoint 2
+      target: "http://localhost:4004", // API endpoint 1
       changeOrigin: true,
       pathRewrite: {
         "^/api1": "",

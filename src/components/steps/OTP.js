@@ -3,8 +3,8 @@ import { StepperContext } from "../../contexts/StepperContext";
 import Timer from "../Timer";
 
 function OTP() {
-  const { userData, setUserData } = useContext(StepperContext);
   const [timer, setTimer] = useState(10);
+  const { userData, setUserData } = useContext(StepperContext);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUserData({ ...userData, [name]: value });
@@ -25,21 +25,28 @@ function OTP() {
     <div>
       <div className="mx-2 w-full flex-1">
         <div className="mt-3 h-6 text-xs font-bold uppercase leading-8 text-gray-500">
-          Please Check your email and enter the OTP
+          Please Check your Email and enter the OTP
         </div>
 
         <div className="my-2 flex rounded border border-gray-200 bg-white p-1">
           <input
             onChange={handleChange}
-            value={userData["OTP"] || ""}
+            value={userData["otp"] || ""}
             name="otp"
             placeholder="OTP"
             type="text"
+            maxlength="6"
             className="w-full appearance-none p-1 px-2 text-gray-800 outline-none"
           />
         </div>
         <div className="flex flex-row justify-between">
-          <div className={ `${timer >0 ? "text-green-700 font-bold" : " font-bold text-rose-600"}`}>
+          <div
+            className={`${
+              timer > 0
+                ? "text-green-700 font-bold"
+                : " font-bold text-rose-600"
+            }`}
+          >
             <Timer timer={timer} />
           </div>
           {timer <= 0 && (
@@ -52,6 +59,5 @@ function OTP() {
     </div>
   );
 }
-// `${timer >0 ? "text-green-500" : "text-rose-600"}`
 
 export default OTP;

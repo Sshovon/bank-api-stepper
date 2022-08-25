@@ -1,9 +1,7 @@
 import "../App.css";
 import Stepper from "../components/Stepper";
 import StepperControl from "../components/StepperControl";
-
 import { StepperContext } from "../contexts/StepperContext";
-
 import PaymentDetails from "../components/steps/PaymentDetails";
 import OTP from "../components/steps/OTP";
 import Final from "../components/steps/Final";
@@ -11,7 +9,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
-function BankScreen({ accountNumber, amount }) {
+function BankScreen({ accountNumber, amount, email, ecomAccountNumber }) {
   const steps = ["Payment Details", "One Time Password", "Confirmation"];
   const [currentStep, setCurrentStep] = useState(1);
   const [userData, setUserData] = useState({ amount, accountNumber });
@@ -26,18 +24,51 @@ function BankScreen({ accountNumber, amount }) {
     return axios.post("/api1/valid/", { amount, accountNumber });
   };
 
+  const sendMail = async () => {
+    return axios.post("/api3/otp/send", {
+      email,
+    });
+  };
+
+  const verifyOTP = async () => {
+    return axios.get(`/api3/otp/verify/${userData.otp}`);
+  };
+
+  const makePayment = async () => {
+    axios
+      .post("/api1/adjust", {
+        inID: ecomAccountNumber,
+        outID: accountNumber,
+        amount,
+      })
+      .then((result) => {
+        console.log(result);
+        return axios.post("/api1/add", {
+          inID: ecomAccountNumber,
+          outID: accountNumber,
+          amount,
+        });
+      });
+  };
+
   const handleClick = async (direction = null) => {
     let newStep = currentStep;
     if (newStep === 1) {
+      console.log(userData);
       await Promise.all([validTransaction(), accountVerifier()])
-        .then(function (results) {
+        .then(async function (results) {
           const [validTransactionResult, accountVerifyResult] = results;
 
           if (accountVerifyResult.data.status === false) {
             toast.error("Incorrect PIN");
           } else if (validTransactionResult.data.status === "invalid") {
             toast.error("Insufficient Balance");
-          }else{
+          } else {
+            await toast.promise(sendMail(), {
+              loading: "Sending Mail...",
+              success: "Mail Sent",
+              error: "Error Occured!!",
+            });
             direction === "next" ? newStep++ : newStep--;
             newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
           }
@@ -46,11 +77,27 @@ function BankScreen({ accountNumber, amount }) {
           toast.error("Error Occured!!");
         });
     } else if (newStep === 2) {
+      const result = await verifyOTP();
+      console.log(result.data);
+      if (result.data.status == !true) {
+        toast.error("OTP Verification failed!!");
+      } else {
+        await toast.promise(sendMail(), {
+          loading: "Verifing OTP",
+          success: "OTP Verified",
+          error: "OTP Verification Failed",
+        });
+        await toast.promise(makePayment(), {
+            loading: "Wait a bit...",
+            success: "Transaction Successful",
+            error: "Transaction Failed",
+          });
+
         direction === "next" ? newStep++ : newStep--;
         newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
+      }
+      
     }
-    // direction === "next" ? newStep++ : newStep--;
-    // newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
     // check if steps are within bounds
   };
   const displayStep = (step) => {

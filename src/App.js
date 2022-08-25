@@ -10,7 +10,7 @@ function App() {
   return(
     <>
      <Toaster/>
-    <BankScreen accountNumber={"12345"} amount={"123456"}/>
+    <BankScreen accountNumber={"12345"} ecomAccountNumber={"54321"} amount={"123456"} email={"frcshovon@gmail.com"}/>
     </>
   )
 }

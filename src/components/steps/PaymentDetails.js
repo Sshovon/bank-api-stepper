@@ -52,6 +52,7 @@ function PaymentDetails() {
               name="secret"
               placeholder="Secret"
               type="password"
+              maxlength="4"
               className="w-full appearance-none p-1 px-2 text-gray-800 outline-none"
             />
           </div>
